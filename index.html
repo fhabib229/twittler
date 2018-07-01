@@ -1,27 +1,104 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <script src="jquery.js"></script>
-    <script src="data_generator.js"></script>
-  </head>
-  <body>
+<head>
+  <script src="jquery.js"></script>
+  <script src="data_generator.js"></script>
+  <link rel="stylesheet" type="text/css" href="twittler.css">
+</head>
+
+<body>
+  <main>
+    <h1>Welcome to Twittler</h1>
+    <button class="hidden">Return to all tweets</button>
     <script>
 
-      $(document).ready(function(){
-        var $body = $('body');
-        $body.html('');
+      $(document).ready(function() {
 
-        var index = streams.home.length - 1;
-        while(index >= 0){
-          var tweet = streams.home[index];
-          var $tweet = $('<div></div>');
-          $tweet.text('@' + tweet.user + ': ' + tweet.message);
-          $tweet.appendTo($body);
-          index -= 1;
-        }
+              //the $body variable is an object containing all tweets
+              var $body = $('body');     
+              var tweet = streams.home[nthTweetsDisplayed];
+              var $tweet = $('<div></div>');
+              var $handle = $('<span class="handle"></span>');
+              var nthTweetsDisplayed=0;
+              
+              var $mainDiv = $('<div></div>'); 
+              $($mainDiv).addClass('mainDiv'); 
 
+
+              //make a separate div for each handle
+              var $mracusDiv= $('<div class="mracusDiv hidden"><strong>mracus\' timeline</strong></div>');
+              var $sharksforcheapDiv= $('<div class="sharksforcheapDiv hidden"><strong>sharksforcheap\'s timeline</strong></div>'); 
+              var $douglascalhounDiv= $('<div class="douglascalhounDiv hidden"><strong>douglascalhoun\'s timeline</strong></div>'); 
+              var $shawndrostDiv= $('<div class="shawndrostDiv hidden"><strong>shawndrost\'s timeline</strong></div>'); 
+
+
+              //separates user divs from main div
+              $mainDiv.appendTo($body);
+              $mracusDiv.insertAfter($mainDiv);
+              $sharksforcheapDiv.insertAfter($mracusDiv);
+              $douglascalhounDiv.insertAfter($sharksforcheapDiv);
+              $shawndrostDiv.insertAfter($douglascalhounDiv);
+
+              setInterval(function() {
+               if (nthTweetsDisplayed < streams.home.length-1) {
+                 tweet = streams.home[nthTweetsDisplayed];
+                 $tweet = $('<div></div>');
+                   $handle = $('<span class="handle"></span>'); //
+                   $($handle).addClass(tweet.user);
+                   $handle.text('@'+tweet.user);
+                   var $timestamp = tweet.created_at;
+                   $tweet.text(" " + tweet.message + "   (" + $timestamp + ")"); //keep
+                   $($tweet).addClass(tweet.user + '_tweets');
+                   
+                   //assign all tweets to main div
+                   $tweet.appendTo($mainDiv);
+
+                   //assign each tweet to the respective user's div
+                   for (var i=0; i<window.users.length; i++)
+                   {
+                    var username = window.users[i];
+                    if($tweet.hasClass(window.users[i]+"_tweets") === true)
+                    {
+                     var $usernameDiv= $("."+username+'Div'); //select class by username
+                     //console.log($usernameDiv);
+                     $tweet.clone().appendTo($usernameDiv);
+                   }
+                 }
+
+                  //clickable @userhandle span that allows the user's timeline to appear
+                  $handle.prependTo($tweet); 
+                  nthTweetsDisplayed++;
+                }
+               }, 1000); //one second delay between each
+
+
+
+//upon clicking on a handle, get its classes (one will be .handle, other will be username)
+//string concat the retrieved username to specify which div to show/hide
+$("body").on("click", ".handle", function()
+{
+  var classes = $(this).attr("class").split(' ');
+  var username;
+  for (var i = 0; i < classes.length; i++)
+  {
+    username = classes[1];
+    $(".mainDiv").addClass('hidden');  
+      $("."+username+'Div').removeClass('hidden');  //where $userHandleDiv is ".mracusDiv"
+      $("button").removeClass('hidden');
+      $("button").on("click", function()
+      {
+        $(".mainDiv").removeClass('hidden');
+        $("."+username+'Div').addClass('hidden');
+        $("button").addClass('hidden');
       });
+    }
+  });
 
-    </script>
-  </body>
+
+    });//this goes with documentready.function()
+
+
+  </script>
+</main>
+</body>
 </html>
